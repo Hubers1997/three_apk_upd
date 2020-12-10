@@ -43,17 +43,8 @@ public class MyForegroundService extends Service {
     private Timer timer;
     private TimerTask timerTask;
     final Handler handler = new Handler();
-    final Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-        }
-    };
 
-    private void doWork() {
-        if(do_work) {
-            timer.schedule(timerTask, 0L, double_speed ? period / 2L : period);
-        }
-    }
+
 
     @Override
     public void onCreate() {
@@ -121,23 +112,36 @@ public class MyForegroundService extends Service {
         return START_NOT_STICKY;
     }
 
+    final Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            Notification notification = new Notification.Builder(ctx, CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_my_icon)
+                    .setContentTitle(getString(R.string.ser_title))
+                    .setShowWhen(show_time)
+                    .setContentText(message + " " + String.valueOf(counter))
+                    .setLargeIcon(BitmapFactory.decodeResource (getResources() , R.drawable.circle ))
+                    .setContentIntent(pendingIntent)
+                    .build();
+
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.notify(1,notification);
+        }
+    };
+
+    private void doWork() {
+        if(do_work) {
+            timer.schedule(timerTask, 0L, double_speed ? period / 2L : period);
+        }
+    }
+
+
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void createNotificationChannel() {
         NotificationChannel serviceChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
         NotificationManager manager = getSystemService(NotificationManager.class);
         manager.createNotificationChannel(serviceChannel);
     }
-    public void run() {
-        Notification notification = new Notification.Builder(ctx, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_my_icon)
-                .setContentTitle(getString(R.string.ser_title))
-                .setShowWhen(show_time)
-                .setContentText(message + " " + String.valueOf(counter))
-                .setLargeIcon(BitmapFactory.decodeResource (getResources() , R.drawable.circle ))
-                .setContentIntent(pendingIntent)
-                .build();
 
-        NotificationManager manager = getSystemService(NotificationManager.class);
-        manager.notify(1,notification);
-    }
 }
